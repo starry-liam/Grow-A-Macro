@@ -17,8 +17,13 @@ return
 LoopClick:
 if (looping)
 {
+    Send, {s, Down}
+    Sleep, 6000
+    Send, {s, Up}
+    Send, {d, Down}
     Sleep, 3000
-    MouseClickDrag, Right, 300, 300, 800, 300
+    Send, {d, Up}
+    
 }
 return
 
