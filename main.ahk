@@ -124,37 +124,50 @@ return
 F1::Start()
 F2::Toggles()  
 F3::Stop()    
+F4::seedTravel()  ; F4 to seed travel
 
-Start(){ ; Start loop
+; Global flags
+toggle := false
+running := false
+
+; Start the loop (doesn't run anything unless toggle := true)
+InitLoop() {
+    global running
     if running
-        return  ; Already running, do nothing
-    toggle := true
+        return
     running := true
-    Loop {
-        if !toggle
-            break
-        Sleep, 500
-    }
-    running := false
-} 
+    SetTimer, LoopTask, 500
+}
 
-Stop(){   ; Stop loop
+Start() {
+    global toggle
+    toggle := true
+    InitLoop()
+}
+
+Stop() {
+    global toggle
     toggle := false
 }
 
-Toggles(){  ; Toggle loop on/off
-    if running {
-        toggle := !toggle
-    } else {
-        toggle := true
-        running := true
-        Loop {
-            if !toggle
-                break
-            Sleep, 500
-        }
-        running := false
-    }
+Toggles() {
+    global toggle
+    toggle := !toggle
+    InitLoop()
+}
+
+LoopTask:
+if (toggle) {
+    seedTravel()
+}
+return
+
+
+seedTravel()
+{
+    MouseMove, 700, 150, 10
+    Sleep, 1000
+    Click, Left
 }
 
 Return
