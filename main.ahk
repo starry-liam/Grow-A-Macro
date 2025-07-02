@@ -7,65 +7,125 @@ Gui, Add, Tab, x10 y10 w400 h250, Main|Seeds|Gear|Settings
 toggle := false
 running := false
 
-btnLabels := Object()
-btnLabels[1] := "Carrots"
-btnLabels[2] := "Strawberries"
-btnLabels[3] := "Blueberries"
-btnLabels[4] := "Tomatoes"
-btnLabels[5] := "Califlower"
-btnLabels[6] := "Watermelon"
-btnLabels[7] := "Rafflesia"
-btnLabels[8] := "Green Apple"
-btnLabels[9] := "Avocado"
-btnLabels[10] := "Banana"
-btnLabels[11] := "Pineapple"
-btnLabels[12] := "Kiwi"
-btnLabels[13] := "Bellpepper"
-btnLabels[14] := "Pricly Pear"
-btnLabels[15] := "Loquats"
-btnLabels[16] := "Feijoa"
-btnLabels[17] := "Pitcher Plant"
-btnLabels[18] := "Sugar Apple"
+seedLabels := Object()
+seedStates := Object()
+seedLabels[1] := "Carrots"
+seedLabels[2] := "Strawberries"
+seedLabels[3] := "Blueberries"
+seedLabels[4] := "Tomatoes"
+seedLabels[5] := "Califlower"
+seedLabels[6] := "Watermelon"
+seedLabels[7] := "Rafflesia"
+seedLabels[8] := "Green Apple"
+seedLabels[9] := "Avocado"
+seedLabels[10] := "Banana"
+seedLabels[11] := "Pineapple"
+seedLabels[12] := "Kiwi"
+seedLabels[13] := "Bellpepper"
+seedLabels[14] := "Pricly Pear"
+seedLabels[15] := "Loquats"
+seedLabels[16] := "Feijoa"
+seedLabels[17] := "Pitcher Plant"
+seedLabels[18] := "Sugar Apple"
+
+gearLabels := Object()
+gearStates := Object()
+gearLabels[1] := "Watering Can"
+gearLabels[2] := "Trowel"
+gearLabels[3] := "Recall Wrench"
+gearLabels[4] := "Basic Sprinkler"
+gearLabels[5] := "Advanced Sprinkler"
+gearLabels[6] := "Godly Sprinkler"
+gearLabels[7] := "Magnifying Glass"
+gearLabels[8] := "Tanning Mirror"
+gearLabels[9] := "Master Sprinkler"
+gearLabels[10] := "Cleaning Spray"
+gearLabels[11] := "Favorite Tool"
+gearLabels[12] := "Harvest Tool"
+gearLabels[13] := "Friendship Pot"
 
 Loop, 18
-    state%A_Index% := True
+    seedStates[A_Index] := True
 
 btnWidth := 130
 btnHeight := 26
 padding := 8
 cols := 3
 
+Loop, 13
+    gearStates[A_Index] := False
+
+btnWidth := 130
+btnHeight := 26
+padding := 8
+cols := 3
+
+
 Gui, Font, s9, Segoe UI
+
+Gui Tab, 1
+Gui, Add, Button, x70 y220 w80 h20 gStart, [F1] Start
+Gui Tab, 1
+Gui, Add, Button, x160 y220 w80 h20 gToggles, [F2] Toggle
+Gui Tab, 1
+Gui, Add, Button, x250 y220 w80 h20 gStop, [F3] Stop
 
 Loop, 18
 {
     idx := A_Index
-    label := btnLabels[idx]
+    slabel := seedLabels[idx]
     col := Mod(idx - 1, cols)
     row := Floor((idx - 1) / cols)
     x := 10 + (btnWidth + padding) * col
     y := 40 + (btnHeight + padding) * row
     Gui, Tab, 2
-    Gui, Add, Button, x%x% y%y% w%btnWidth% h%btnHeight% gToggle vBtn%idx%, %label%
+    Gui, Add, Button, x%x% y%y% w%btnWidth% h%btnHeight% gSToggle vSBtn%idx%, [ON] %slabel%
 }
-
+Loop, 13
+{
+    idx := A_Index
+    glabel := gearLabels[idx]
+    col := Mod(idx - 1, cols)
+    row := Floor((idx - 1) / cols)
+    x := 10 + (btnWidth + padding) * col
+    y := 40 + (btnHeight + padding) * row
+    Gui, Tab, 3
+Gui, Add, Button, x%x% y%y% w%btnWidth% h%btnHeight% gGToggle vGBtn%idx%, [OFF] %glabel%
+}
 Gui, Show,, GrowAMacro
 return
 
-Toggle:
+SToggle:
 GuiControlGet, ctrlName, FocusV
-StringTrimLeft, idx, ctrlName, 3
-state%idx% := !state%idx%
-label := btnLabels[idx]
+StringTrimLeft, idx, ctrlName, 4  ; remove "SBtn"
+slabel := seedLabels[idx]
+seedStates[idx] := !seedStates[idx]
 
-if (state%idx%) {
-    GuiControl,, Btn%idx%, [ON] %label%
+if (seedStates[idx]) {
+    GuiControl,, SBtn%idx%, [ON] %slabel%
 } else {
-    GuiControl,, Btn%idx%, [OFF] %label%
+    GuiControl,, SBtn%idx%, [OFF] %slabel%
 }
 return
 
-F1:: {  ; Start loop
+GToggle:
+GuiControlGet, ctrlName, FocusV
+StringTrimLeft, idx, ctrlName, 4  ; remove "SBtn"
+glabel := gearLabels[idx]
+gearStates[idx] := !gearStates[idx]
+
+if (gearStates[idx]) {
+    GuiControl,, GBtn%idx%, [ON] %glabel%
+} else {
+    GuiControl,, GBtn%idx%, [OFF] %glabel%
+}
+return
+
+F1::Start()
+F2::Toggles()  
+F3::Stop()    
+
+Start(){ ; Start loop
     if running
         return  ; Already running, do nothing
     toggle := true
@@ -76,13 +136,13 @@ F1:: {  ; Start loop
         Sleep, 500
     }
     running := false
+} 
 
-
-F3::   ; Stop loop
+Stop(){   ; Stop loop
     toggle := false
-Return
+}
 
-F2::  ; Toggle loop on/off
+Toggles(){  ; Toggle loop on/off
     if running {
         toggle := !toggle
     } else {
@@ -95,6 +155,8 @@ F2::  ; Toggle loop on/off
         }
         running := false
     }
+}
+
 Return
 
 GuiClose:
