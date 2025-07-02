@@ -1,142 +1,90 @@
+; AutoHotkey v2.0 version of GrowAMacro GUI
+#Requires AutoHotkey v2.0
 #SingleInstance Force
-SetBatchLines, -1
-
-Gui, Add, Tab, x10 y10 w400 h250, Main|Seeds|Gear|Settings
 
 
-toggle := false
-running := false
+; Global state
+global toggle := false
+global running := false
 
-seedLabels := Object()
-seedStates := Object()
-seedLabels[1] := "Carrots"
-seedLabels[2] := "Strawberries"
-seedLabels[3] := "Blueberries"
-seedLabels[4] := "Tomatoes"
-seedLabels[5] := "Califlower"
-seedLabels[6] := "Watermelon"
-seedLabels[7] := "Rafflesia"
-seedLabels[8] := "Green Apple"
-seedLabels[9] := "Avocado"
-seedLabels[10] := "Banana"
-seedLabels[11] := "Pineapple"
-seedLabels[12] := "Kiwi"
-seedLabels[13] := "Bellpepper"
-seedLabels[14] := "Pricly Pear"
-seedLabels[15] := "Loquats"
-seedLabels[16] := "Feijoa"
-seedLabels[17] := "Pitcher Plant"
-seedLabels[18] := "Sugar Apple"
+seedLabels := ["Carrots", "Strawberries", "Blueberries", "Tomatoes", "Califlower", "Watermelon", "Rafflesia", "Green Apple", "Avocado", "Banana", "Pineapple", "Kiwi", "Bellpepper", "Pricly Pear", "Loquats", "Feijoa", "Pitcher Plant", "Sugar Apple"]
+seedStates := Map()
+Loop seedLabels.Length
+    seedStates[A_Index] := true
 
-gearLabels := Object()
-gearStates := Object()
-gearLabels[1] := "Watering Can"
-gearLabels[2] := "Trowel"
-gearLabels[3] := "Recall Wrench"
-gearLabels[4] := "Basic Sprinkler"
-gearLabels[5] := "Advanced Sprinkler"
-gearLabels[6] := "Godly Sprinkler"
-gearLabels[7] := "Magnifying Glass"
-gearLabels[8] := "Tanning Mirror"
-gearLabels[9] := "Master Sprinkler"
-gearLabels[10] := "Cleaning Spray"
-gearLabels[11] := "Favorite Tool"
-gearLabels[12] := "Harvest Tool"
-gearLabels[13] := "Friendship Pot"
-
-Loop, 18
-    seedStates[A_Index] := True
+gearLabels := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler", "Godly Sprinkler", "Magnifying Glass", "Tanning Mirror", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship Pot"]
+gearStates := Map()
+Loop gearLabels.Length
+    gearStates[A_Index] := false
 
 btnWidth := 130
 btnHeight := 26
 padding := 8
 cols := 3
 
-Loop, 13
-    gearStates[A_Index] := False
+mainGui := Gui()
+mainGui.SetFont("s9", "Segoe UI")
+mainGui.Add("Tab3", "x10 y10 w400 h250 vTab", ["Main", "Seeds", "Gear", "Settings"])
 
-btnWidth := 130
-btnHeight := 26
-padding := 8
-cols := 3
+; Main tab buttons
+mainGui.Tab := 1
+mainGui.Add("Button", "x70 y220 w80 h20", "[F1] Start").OnEvent("Click", (*) => Start())
+mainGui.Add("Button", "x160 y220 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
+mainGui.Add("Button", "x250 y220 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
 
-
-Gui, Font, s9, Segoe UI
-
-Gui Tab, 1
-Gui, Add, Button, x70 y220 w80 h20 gStart, [F1] Start
-Gui Tab, 1
-Gui, Add, Button, x160 y220 w80 h20 gToggles, [F2] Toggle
-Gui Tab, 1
-Gui, Add, Button, x250 y220 w80 h20 gStop, [F3] Stop
-
-Loop, 18
-{
+; Seed tab buttons
+Loop seedLabels.Length {
     idx := A_Index
-    slabel := seedLabels[idx]
+    label := seedLabels[idx]
     col := Mod(idx - 1, cols)
     row := Floor((idx - 1) / cols)
     x := 10 + (btnWidth + padding) * col
     y := 40 + (btnHeight + padding) * row
-    Gui, Tab, 2
-    Gui, Add, Button, x%x% y%y% w%btnWidth% h%btnHeight% gSToggle vSBtn%idx%, [ON] %slabel%
+    mainGui.Tab := 2
+    btn := mainGui.Add("Button", Format("x{} y{} w{} h{} vSBtn{}", x, y, btnWidth, btnHeight, idx), "[ON] " label)
+    btn.OnEvent("Click", (*) => SToggle(idx))
 }
-Loop, 13
-{
+
+; Gear tab buttons
+Loop gearLabels.Length {
     idx := A_Index
-    glabel := gearLabels[idx]
+    label := gearLabels[idx]
     col := Mod(idx - 1, cols)
     row := Floor((idx - 1) / cols)
     x := 10 + (btnWidth + padding) * col
     y := 40 + (btnHeight + padding) * row
-    Gui, Tab, 3
-Gui, Add, Button, x%x% y%y% w%btnWidth% h%btnHeight% gGToggle vGBtn%idx%, [OFF] %glabel%
+    mainGui.Tab := 3
+    btn := mainGui.Add("Button", Format("x{} y{} w{} h{} vGBtn{}", x, y, btnWidth, btnHeight, idx), "[OFF] " label)
+    btn.OnEvent("Click", (*) => GToggle(idx))
 }
-Gui, Show,, GrowAMacro
-return
 
-SToggle:
-GuiControlGet, ctrlName, FocusV
-StringTrimLeft, idx, ctrlName, 4  ; remove "SBtn"
-slabel := seedLabels[idx]
-seedStates[idx] := !seedStates[idx]
+mainGui.OnEvent("Close", (*) => ExitApp())
+mainGui.Show("w420 h280")
 
-if (seedStates[idx]) {
-    GuiControl,, SBtn%idx%, [ON] %slabel%
-} else {
-    GuiControl,, SBtn%idx%, [OFF] %slabel%
+; --- Functions ---
+
+SToggle(idx) {
+    global seedStates, seedLabels, mainGui
+    seedStates[idx] := !seedStates[idx]
+    text := (seedStates[idx] ? "[ON] " : "[OFF] ") . seedLabels[idx]
+    mainGui.GetControl("SBtn" idx).Text := text 
+
 }
-return
 
-GToggle:
-GuiControlGet, ctrlName, FocusV
-StringTrimLeft, idx, ctrlName, 4  ; remove "SBtn"
-glabel := gearLabels[idx]
-gearStates[idx] := !gearStates[idx]
+GToggle(idx) {
+    global gearStates, gearLabels, Gui
+    gearStates[idx] := !gearStates[idx]
+    text := (gearStates[idx] ? "[ON] " : "[OFF] ") . gearLabels[idx]
+    mainGui.GetControl("GBtn" idx).Text := text 
 
-if (gearStates[idx]) {
-    GuiControl,, GBtn%idx%, [ON] %glabel%
-} else {
-    GuiControl,, GBtn%idx%, [OFF] %glabel%
 }
-return
 
-F1::Start()
-F2::Toggles()  
-F3::Stop()    
-F4::seedTravel()  ; F4 to seed travel
-
-; Global flags
-toggle := false
-running := false
-
-; Start the loop (doesn't run anything unless toggle := true)
 InitLoop() {
     global running
     if running
         return
     running := true
-    SetTimer, LoopTask, 500
+    SetTimer(LoopTask, 500)
 }
 
 Start() {
@@ -148,6 +96,7 @@ Start() {
 Stop() {
     global toggle
     toggle := false
+    SetTimer(LoopTask, 0)
 }
 
 Toggles() {
@@ -156,21 +105,16 @@ Toggles() {
     InitLoop()
 }
 
-LoopTask:
-if (toggle) {
-    seedTravel()
-}
-return
-
-
-seedTravel()
-{
-    MouseMove, 700, 150, 10
-    Sleep, 1000
-    Click, Left
+LoopTask(*) {
+    global toggle
+    if toggle
+        seedTravel()
 }
 
-Return
-
-GuiClose:
-ExitApp
+seedTravel() {
+    MouseMove 700, 150, 10
+    Sleep 1000
+    Click "Left"
+    Sleep 100
+    Send "e"
+}

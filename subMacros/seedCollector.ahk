@@ -5,9 +5,9 @@
 collectSeeds() {
     Send("\")
     Sleep(100)
-    Send("{D}")
+    Send("{S}")
     Sleep(100)
-    Send("{D}")
+    Send("{S}")
     Sleep(100)
     Send("{{Enter}}")
     
