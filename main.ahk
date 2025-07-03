@@ -26,6 +26,9 @@ cols := 3
 gearButtons := [] 
 seedButtons := []
 
+options := ["Walk", "Recall Wrench", "None"]
+currentIndex := 2  ; Start with the first option
+
 mainGui := Gui()
 mainGui.SetFont("s9", "Segoe UI")
 
@@ -34,9 +37,17 @@ tab.UseTab(0) ; Important: reset first
 
 ; Main tab buttons
 tab.UseTab(1)
-mainGui.Add("Button", "x70 y220 w80 h20", "[F1] Start").OnEvent("Click", (*) => Start())
-mainGui.Add("Button", "x160 y220 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
-mainGui.Add("Button", "x250 y220 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
+mainGui.Add("Button", "x95 y240 w80 h20", "[F1] Start").OnEvent("Click", (*) => Start())
+mainGui.Add("Button", "x185 y240 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
+mainGui.Add("Button", "x275 y240 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
+
+leftBtn := mainGui.Add("Button", "x20 y70 w30", "<")
+leftBtn.OnEvent("Click", (*) => ChangeOption(-1))
+
+optionDisplay := mainGui.Add("Text", "x40 y75 w120 Center vOptionLabel", options[currentIndex])
+
+rightBtn := mainGui.Add("Button", "x150 y70 w30", ">")
+rightBtn.OnEvent("Click", (*) => ChangeOption(1))
 
 ; Seed tab buttons
 tab.UseTab(2)
@@ -76,6 +87,7 @@ mainGui.Show("w475 h300")
 
 ; --- Functions ---
 
+
 SToggle(idx) {
     global seedStates, seedLabels, seedButtons
     seedStates[idx] := !seedStates[idx]
@@ -97,6 +109,22 @@ InitLoop() {
     running := true
     SetTimer(LoopTask, 500)
 }
+
+ChangeOption(direction) {
+    global options, currentIndex, optionDisplay
+    currentIndex += direction
+
+    if currentIndex < 1
+        currentIndex := options.Length
+    else if currentIndex > options.Length
+        currentIndex := 1
+    if (currentIndex == 2)
+        if (!gearStates[3])
+            GToggle(3)
+
+    optionDisplay.Text := options[currentIndex]
+}
+
 F1::Start()
 F2::Toggles()
 F3::Stop()
@@ -125,12 +153,13 @@ LoopTask(*) {
         
         seedTravel()
         loop 19 {
-        if i <= seedLabels.Length {
+            if (i > 18) {
+                i := 19
+            }
             seedCollector(i)
             i++
-        } else {
-            i := 1
-        }
-        }
+
+        } 
+        gearTravel()
         Stop()
 }
