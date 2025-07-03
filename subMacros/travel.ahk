@@ -12,11 +12,9 @@ seedTravel() {
     Send "e"
     Sleep 3000
     Send "{\}"
-    Sleep 1000
+    Sleep 100
     Send "s"
-    Sleep 1000
-    Send "s"
-    Sleep 1000
+    Sleep 100
     Send "s"
 }
 gearTravel() {

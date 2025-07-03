@@ -2,30 +2,37 @@
 
 #Include ..\main.ahk
 
-seedQuantity := [24, 24, 18, 12, 8, 8, 8, 8, 8, 6, 6, 6, 6, 4, 4, 4, 2]
+seedQuantity := [24, 24, 18, 12, 12, 8, 8, 8, 8, 8, 6, 6, 6, 6, 4, 4, 4, 2]
 
 collectSeeds(amount) {
+    Send "{Enter}"
+    Sleep 100
+    Send "s"
+    Sleep 100
     loop amount {
         Send "{Enter}"
-        Sleep 1000
+        Sleep 100
     }
+    Send "w"
+    Sleep 100
+    Send "{Enter}"
+    Sleep 100
+    Send "s"
+    Sleep 100
 }
+
 seedCollector(i) {
     global seedStates, seedQuantity
 
     if seedStates[i] {
-        Send "{Enter}"
-        Sleep 1000
-        Send "s"
-        Sleep 1000
         collectSeeds(seedQuantity[i])
-        Send "w"
-        Sleep 1000
-        Send "{Enter}"
-        Sleep 1000
+    }
+    else if (i <= 17) {
+        Send "s"
+        Sleep 100
     }
     else {
-        Send "s"
-        Sleep 1000
+        Send "w"
+        Sleep 100
     }
 }

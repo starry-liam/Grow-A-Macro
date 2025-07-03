@@ -124,12 +124,13 @@ LoopTask(*) {
     if toggle
         
         seedTravel()
+        loop 19 {
         if i <= seedLabels.Length {
             seedCollector(i)
             i++
         } else {
-            i := 0
+            i := 1
         }
-        Sleep(100000)
+        }
+        Stop()
 }
-
