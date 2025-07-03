@@ -18,7 +18,6 @@ gearStates := Map()
 Loop gearLabels.Length
     gearStates[A_Index] := false
 
-i := 1
 btnWidth := 130
 btnHeight := 26
 padding := 8
@@ -128,7 +127,7 @@ ChangeOption(direction) {
 F1::Start()
 F2::Toggles()
 F3::Stop()
-F4::gearTravel()
+
 
 Start() {
     global toggle
@@ -149,19 +148,9 @@ Toggles() {
 }
 
 LoopTask(*) {
-    global toggle, i
+    global toggle, i, g
     if toggle
         align()
-        seedTravel()
-        loop 19 {
-            if (i > 18) {
-                i := 19
-            }
-            seedCollector(i)
-            i++
-
-        } 
-        gearTravel()
-
+        masterCollect()
         Stop()
 }

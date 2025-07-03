@@ -32,7 +32,10 @@ gearTravel() {
         Click "Left"
         Sleep 1000
         Send "e"
+        Sleep 3000
         MouseMove 1100, 525, 10
+        Sleep 100
+        MouseMove 1200, 525, 10
         Sleep 100
         Click "Left"
         Sleep 3000
