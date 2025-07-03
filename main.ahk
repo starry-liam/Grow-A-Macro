@@ -128,6 +128,7 @@ ChangeOption(direction) {
 F1::Start()
 F2::Toggles()
 F3::Stop()
+F4::gearTravel()
 
 Start() {
     global toggle
@@ -150,7 +151,7 @@ Toggles() {
 LoopTask(*) {
     global toggle, i
     if toggle
-        
+        align()
         seedTravel()
         loop 19 {
             if (i > 18) {
@@ -161,5 +162,6 @@ LoopTask(*) {
 
         } 
         gearTravel()
+
         Stop()
 }
