@@ -2,7 +2,8 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-
+#Include subMacros\seedCollector.ahk
+#Include subMacros\travel.ahk
 ; Global state
 global toggle := false
 global running := false
@@ -17,6 +18,7 @@ gearStates := Map()
 Loop gearLabels.Length
     gearStates[A_Index] := false
 
+i := 1
 btnWidth := 130
 btnHeight := 26
 padding := 8
@@ -43,8 +45,8 @@ Loop seedLabels.Length {
     label := seedLabels[idx]
     col := Mod(idx - 1, cols)
     row := Floor((idx - 1) / cols)
-    x := 10 + (btnWidth + padding) * col
-    y := 40 + (btnHeight + padding) * row
+    x := 30 + (btnWidth + padding) * col
+    y := 55 + (btnHeight + padding) * row
     btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), "[ON] " label)
     btn.OnEvent("Click", SCallback(idx))
     seedButtons.Push(btn)
@@ -60,8 +62,8 @@ Loop gearLabels.Length {
     label := gearLabels[idx]
     col := Mod(idx - 1, cols)
     row := Floor((idx - 1) / cols)
-    x := 10 + (btnWidth + padding) * col
-    y := 40 + (btnHeight + padding) * row
+    x := 30 + (btnWidth + padding) * col
+    y := 55 + (btnHeight + padding) * row
     btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), "[OFF] " label)
     btn.OnEvent("Click", GCallback(idx))
     gearButtons.Push(btn)  ; Store control
@@ -95,6 +97,9 @@ InitLoop() {
     running := true
     SetTimer(LoopTask, 500)
 }
+F1::Start()
+F2::Toggles()
+F3::Stop()
 
 Start() {
     global toggle
@@ -115,15 +120,16 @@ Toggles() {
 }
 
 LoopTask(*) {
-    global toggle
+    global toggle, i
     if toggle
+        
         seedTravel()
+        if i <= seedLabels.Length {
+            seedCollector(i)
+            i++
+        } else {
+            i := 0
+        }
+        Sleep(100000)
 }
 
-seedTravel() {
-    MouseMove 700, 150, 10
-    Sleep 1000
-    Click "Left"
-    Sleep 100
-    Send "e"
-}
