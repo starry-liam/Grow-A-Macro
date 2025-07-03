@@ -25,8 +25,10 @@ cols := 3
 gearButtons := [] 
 seedButtons := []
 
-options := ["Walk", "Recall Wrench", "None"]
+options := ["Walk", "Recall Wrench", "Disabled"]
+slotOptions := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 currentIndex := 2  ; Start with the first option
+slotIndex := 2  ; Start with the first slot
 
 mainGui := Gui()
 mainGui.SetFont("s9", "Segoe UI")
@@ -40,13 +42,26 @@ mainGui.Add("Button", "x95 y240 w80 h20", "[F1] Start").OnEvent("Click", (*) => 
 mainGui.Add("Button", "x185 y240 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
 mainGui.Add("Button", "x275 y240 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
 
-leftBtn := mainGui.Add("Button", "x20 y70 w30", "<")
+leftBtn := mainGui.Add("Button", "x145 y170 w30", "<")
 leftBtn.OnEvent("Click", (*) => ChangeOption(-1))
 
-optionDisplay := mainGui.Add("Text", "x40 y75 w120 Center vOptionLabel", options[currentIndex])
+leftBtn := mainGui.Add("Button", "x145 y140 w30", "<")
+leftBtn.OnEvent("Click", (*) => ChangeSlotOption(-1))
 
-rightBtn := mainGui.Add("Button", "x150 y70 w30", ">")
+mainGui.Add("Text", "x10 y175 w150 Center", "Gear Travel Method:")
+
+mainGui.Add("Text", "x10 y145 w150 Center", "Recall Wrench Slot:")
+
+optionDisplay := mainGui.Add("Text", "x165 y175 w120 Center vOptionLabel", options[currentIndex])
+optionText := mainGui.Add("Text", "x300 y175 w150 Center", "(Recommended)")
+
+SlotOptionDisplay := mainGui.Add("Text", "x165 y145 w120 Center vSlotOptionLabel", slotOptions[slotIndex])
+
+rightBtn := mainGui.Add("Button", "x275 y170 w30", ">")
 rightBtn.OnEvent("Click", (*) => ChangeOption(1))
+
+rightBtn := mainGui.Add("Button", "x275 y140 w30", ">")
+rightBtn.OnEvent("Click", (*) => ChangeSlotOption(1))
 
 ; Seed tab buttons
 tab.UseTab(2)
@@ -117,17 +132,36 @@ ChangeOption(direction) {
         currentIndex := options.Length
     else if currentIndex > options.Length
         currentIndex := 1
-    if (currentIndex == 2)
+    if (currentIndex == 1) {
+        optionText.Text := "(Not Promised to work)"
+    }
+    else if (currentIndex == 2) {
+        optionText.Text := "(Recommended)"
         if (!gearStates[3])
             GToggle(3)
-
+    }
+    else {
+        optionText.Text := "(Disabled)"
+    }
     optionDisplay.Text := options[currentIndex]
+}
+ChangeSlotOption(direction) {
+    global options, slotIndex, SlotOptionDisplay
+    slotIndex += direction
+
+    if slotIndex < 1
+        slotIndex := slotOptions.Length
+    else if slotIndex > slotOptions.Length
+        slotIndex := 1
+
+    SlotOptionDisplay.Text := slotOptions[slotIndex]
 }
 
 F1::Start()
 F2::Toggles()
 F3::Stop()
-
+F4::gearTravel()
+F5::align()
 
 Start() {
     global toggle

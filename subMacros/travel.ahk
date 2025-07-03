@@ -22,12 +22,15 @@ seedTravel() {
     Send "s"
 }
 gearTravel() {
-    if currentIndex == 2 {
+    if currentIndex == 3 {
+        return
+    }
+    else if currentIndex == 2 {
         MouseMove 800, 150, 10
         Sleep 100
         MouseMove 800, 160, 10
         Sleep 500
-        Send "2"
+        Send (slotOptions[slotIndex])
         Sleep 1000
         Click "Left"
         Sleep 1000
@@ -44,6 +47,36 @@ gearTravel() {
         Send "s"
         Sleep 100
         Send "s"
+    }
+    else {
+        gardenTravel()
+        Sleep 100
+        Send "{s down}"
+        Sleep 750
+        Send "{s up}"
+        Sleep 100
+        Send "{a down}"
+        Sleep 15750
+        Send "{a up}"
+        Sleep 100
+        Send "{s down}"
+        Sleep 1900
+        Send "{s up}"
+        Sleep 100
+        Send "e"
+        Sleep 3000
+        MouseMove 1100, 525, 10
+        Sleep 100
+        MouseMove 1200, 525, 10
+        Sleep 100
+        Click "Left"
+        Sleep 3000
+        Send "\"
+        Sleep 100
+        Send "s"
+        Sleep 100
+        Send "s"
+
     }
 }
 gardenTravel() {
