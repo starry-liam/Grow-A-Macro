@@ -183,14 +183,14 @@ Toggles() {
 
 LoopTask(*) {
     global toggle, i, g
-    if toggle
+    loop {
+    if toggle {
         align()
         i := 1
         g := 1
         masterCollect()
-        i := 1
-        g := 1
-        masterCollect()
-
-        Stop()
+    } else {
+        break
+    }
+    }
 }
