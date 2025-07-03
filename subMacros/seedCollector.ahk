@@ -58,11 +58,14 @@ gearCollector(g) {
         Send "\"
     }
     else if (gearStates[g]) {
+        Sleep 1000
         collect(gearQuantity)
     }
-    else if g <= 12{
-        Send "s"
-        Sleep 100
+    else if (!gearStates[g]) {
+        if (g <= 12) {
+            Send "s"
+            Sleep 100
+        }
     }
 }
 
@@ -78,6 +81,7 @@ masterCollect() {
 
         } 
         gearTravel()
+        Sleep 1000
         loop 13 {
             if (g > 13) {
                 g := 14
@@ -87,4 +91,5 @@ masterCollect() {
                 g++
             }
         }
+        gardenTravel()
 }

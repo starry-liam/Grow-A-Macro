@@ -151,6 +151,12 @@ LoopTask(*) {
     global toggle, i, g
     if toggle
         align()
+        i := 1
+        g := 1
         masterCollect()
+        i := 1
+        g := 1
+        masterCollect()
+
         Stop()
 }
