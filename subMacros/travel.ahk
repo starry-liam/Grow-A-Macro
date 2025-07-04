@@ -1,7 +1,41 @@
 #Requires AutoHotkey v2.0
 #Include ..\main.ahk
+centerX := A_ScreenWidth / 2
+centerY := A_ScreenHeight / 2
+; mouse pre gear click
+xRMPG := (800-960)/960
+xMPG := centerX + (xRMPG * centerX)
+yRMPG := (150-540)/540
+yMPG := centerY + (yRMPG * centerY)
 
+yRMPGO := (160-540)/540
+yMPGO := centerY + (yRMPGO * centerY)
 
+; mouse into gear click
+xRMIG := (1100-960)/960
+xMIG := centerX + (xRMIG * centerX)
+yRMIG := (525-540)/540
+yMIG := centerY + (yRMIG * centerY)
+
+xRMIGO := (1200-960)/960
+xMIGO := centerX + (xRMIGO * centerX)
+
+; mouse into settings
+xRMIS := (800-960)/960
+xMIS := centerX + (xRMIS * centerX)
+yRMIS := (150-540)/540
+yMIS := centerY + (yRMIS * centerY)
+
+yRMISO := (160-540)/540
+yMISO := centerY + (yRMISO * centerY)
+; mouse toggling camera
+xRMTC := (1000-960)/960
+xMTC := centerX + (xRMTC * centerX)
+yRMTC := (300-540)/540
+yMTC := centerY + (yRMTC * centerY)
+
+xRMTCO := (1010-960)/960
+xMTCO := centerX + (xRMTCO * centerX)
 
 
 seedTravel() {
@@ -26,9 +60,9 @@ gearTravel() {
         return
     }
     else if currentIndex == 2 {
-        MouseMove 800, 150, 10
+        MouseMove(xMPG, yMPG)
         Sleep 100
-        MouseMove 800, 160, 10
+        MouseMove(xMPG, yMPGO)
         Sleep 500
         Send (slotOptions[slotIndex])
         Sleep 1000
@@ -36,9 +70,9 @@ gearTravel() {
         Sleep 1000
         Send "e"
         Sleep 3000
-        MouseMove 1100, 525, 10
+        MouseMove(xMIG, yMIG)
         Sleep 100
-        MouseMove 1200, 525, 10
+        MouseMove(xMIGO, yMIG)
         Sleep 100
         Click "Left"
         Sleep 3000
@@ -65,9 +99,9 @@ gearTravel() {
         Sleep 100
         Send "e"
         Sleep 3000
-        MouseMove 1100, 525, 10
+        MouseMove(xMIG, yMIG)
         Sleep 100
-        MouseMove 1200, 525, 10
+        MouseMove(xMIGO, yMIG)
         Sleep 100
         Click "Left"
         Sleep 3000
@@ -116,15 +150,15 @@ camAlign(){
 toggleCamera() {
     Send "{Escape}"
     Sleep 100
-    MouseMove 800, 150, 10
+    MouseMove(xMIS, yMIS)
     Sleep 100
-    MouseMove 800, 160, 10
+    MouseMove(xMIS, yMISO)
     Sleep 500
     Click "Left"
     Sleep 100
-    MouseMove 1000, 300, 10
+    MouseMove(xMTC, yMTC)
     Sleep 100
-    MouseMove 1010, 300, 10
+    MouseMove(xMTCO, yMTC)
     Sleep 100
     Click "Left"
     Sleep 100
@@ -134,6 +168,7 @@ toggleCamera() {
 }
 zoomAlign() {
     zoom(1, 25)
+
     Sleep 500
     zoom(-1, 10)
 }

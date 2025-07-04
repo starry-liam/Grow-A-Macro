@@ -22,8 +22,12 @@ btnWidth := 130
 btnHeight := 26
 padding := 8
 cols := 3
+
 gearButtons := [] 
 seedButtons := []
+
+centerX := 0
+centerY := 0
 
 options := ["Walk", "Recall Wrench", "Disabled"]
 slotOptions := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
@@ -159,9 +163,8 @@ ChangeSlotOption(direction) {
 
 F1::Start()
 F2::Toggles()
-F3::Stop()
-F4::gearTravel()
-F5::align()
+F3::ExitApp()
+
 
 Start() {
     global toggle
