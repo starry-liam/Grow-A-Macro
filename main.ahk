@@ -3,7 +3,7 @@
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
 
-currentVersion := "0.2.2"
+currentVersion := "0.2.4"
  
 updateFiles := Map(
     "main.ahk", A_ScriptFullPath,
