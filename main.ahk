@@ -1,9 +1,9 @@
-; AutoHotkey v2.0 version of GrowAMacro GUI
+﻿; AutoHotkey v2.0 version of GrowAMacro GUI
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
 
-currentVersion := "0.2.1"
+currentVersion := "0.2.2"
  
 
 
@@ -274,28 +274,28 @@ LoadStates() {
     
      
 }
-
 DownloadAndReplace() {
-    url := "https://github.com/starry-liam/Grow-A-Macro/blob/main/version.txt"
-    tempFile := A_Temp "\GrowAMacro_Update.ahk"
+    url := "https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/main.ahk"
+    tempFile := A_Temp "\updated_script.ahk"
     newScript := A_ScriptFullPath
 
     if !DownloadFile(url, tempFile) {
-        MsgBox "Failed to download the update."
+        MsgBox("Download failed.")
         return
     }
 
-    FileCopy tempFile, newScript, true  ; Overwrite current script
-    Run newScript
+    FileCopy(tempFile, newScript, true)
+    Run(newScript)
     ExitApp()
 }
+
 GetRemoteText(url) {
     try {
         http := ComObject("WinHttp.WinHttpRequest.5.1")
         http.Open("GET", url, false)
         http.Send()
-        return http.ResponseText
-    } catch as e {
+        return Trim(http.ResponseText)
+    } catch {
         return ""
     }
 }
@@ -305,32 +305,33 @@ DownloadFile(url, savePath) {
         http.Open("GET", url, false)
         http.Send()
 
-        if (http.Status != 200) {
-            MsgBox "HTTP error: " http.Status
-            return false
-        }
+        if http.Status != 200
+            throw Error("HTTP Error: " http.Status)
 
-        file := FileOpen(savePath, "w", "UTF-8")
-        if !file {
-            MsgBox "Failed to open file for writing."
-            return false
-        }
+        stream := ComObject("ADODB.Stream")
+        stream.Type := 1  ; binary
+        stream.Open()
+        stream.Write(http.ResponseBody)
+        stream.SaveToFile(savePath, 2)  ; 2 = overwrite
+        stream.Close()
 
-        file.Write(http.ResponseText)
-        file.Close()
-        return true
-    }
-    catch as e {
-        MsgBox "Download failed:`n" e.Message
+        return FileExist(savePath)
+    } catch as e {
+        MsgBox("Download failed: " e.Message)
         return false
     }
 }
 CheckForUpdates() {
     global currentVersion
-    remoteVersion := GetRemoteText("https://github.com/starry-liam/Grow-A-Macro/blob/main/version.txt")
+    remoteVersion := GetRemoteText("https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/version.txt")
 
-    if (remoteVersion != "" && remoteVersion != currentVersion) {
-        MsgBox "New version " remoteVersion " available.`nUpdating now..."
+    if (remoteVersion = "") {
+        MsgBox("Could not check for updates.")
+        return
+    }
+
+    if (remoteVersion != currentVersion) {
+        MsgBox("New version " remoteVersion " available.`nUpdating now...")
         DownloadAndReplace()
     } else {
         ToolTip "No updates found."
@@ -338,4 +339,3 @@ CheckForUpdates() {
         ToolTip()
     }
 }
-
