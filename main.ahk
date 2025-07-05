@@ -5,7 +5,11 @@ SetWorkingDir A_ScriptDir
 
 currentVersion := "0.2.2"
  
-
+updateFiles := Map(
+    "main.ahk", A_ScriptFullPath,
+    "subMacros/seedCollector.ahk", A_ScriptDir "\subMacros\seedCollector.ahk",
+    "subMacros/travel.ahk", A_ScriptDir "\subMacros\travel.ahk"
+)
 
 SetTimer(CheckForUpdates, -5000) ; Run once after 5s
 
@@ -300,24 +304,27 @@ CheckForUpdates() {
 }
 
 DownloadAndReplace() {
-    url := "https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/main.ahk"
-    tempFile := A_Temp "\updated_script.ahk"
-    newScript := A_ScriptFullPath
+    baseURL := "https://raw.githubusercontent.com/starry-liam/GrowAMacro/main/"
+    updateFiles := Map(
+        "main.ahk", A_ScriptFullPath,
+        "subMacros/seedCollector.ahk", A_ScriptDir "\subMacros\seedCollector.ahk",
+        "subMacros/travel.ahk", A_ScriptDir "\subMacros\travel.ahk"
+    )
 
-    if !DownloadFile(url, tempFile) {
-        MsgBox("Download failed.")
-        return
+    for fileName, localPath in updateFiles {
+        remoteUrl := baseURL fileName
+        tempPath := A_Temp "\" StrReplace(fileName, "/", "_")  ; safe temp filename
+
+        if !DownloadFile(remoteUrl, tempPath) {
+            MsgBox "Failed to download: " remoteUrl
+            return
+        }
+
+        FileCopy tempPath, localPath, true
     }
 
-    content := FileRead(tempFile)
-    if InStr(content, "<!DOCTYPE html>") {
-        MsgBox("Update failed: downloaded file is HTML.")
-        FileDelete(tempFile)
-        return
-    }
-
-    FileCopy(tempFile, newScript, true)
-    Run(newScript)
+    MsgBox "Update complete. Restarting script..."
+    Run A_ScriptFullPath
     ExitApp()
 }
 
