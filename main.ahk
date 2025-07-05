@@ -4,6 +4,8 @@
 SetWorkingDir A_ScriptDir
 
 currentVersion := "0.2.1"
+ 
+
 
 SetTimer(CheckForUpdates, -5000) ; Run once after 5s
 
@@ -57,6 +59,9 @@ tab.UseTab(1)
 mainGui.Add("Button", "x95 y240 w80 h20", "[F1] Start").OnEvent("Click", (*) => Start())
 mainGui.Add("Button", "x185 y240 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
 mainGui.Add("Button", "x275 y240 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
+
+mainGui.Add("Text", "x100 y315 w150 Center", "Grow A Macro v" currentVersion)
+mainGui.Add("Text", "x225 y315 w150 Center", "AHK v" A_AhkVersion )
 
 leftmethodBtn := mainGui.Add("Button", "x145 y170 w30", "<")
 leftmethodBtn.OnEvent("Click", (*) => ChangeOption(-1))
@@ -209,6 +214,7 @@ ChangeExitOption(direction) {
 F1::Start()
 F2::Toggles()
 F3::ExitApp()
+F4:: MsgBox DownloadFile("https://example.com/file.txt", A_ScriptDir "\file.txt") ? "Success!" : "Failed"
 
 Start() {
     global toggle
@@ -268,20 +274,6 @@ LoadStates() {
     
      
 }
-CheckForUpdates() {
-    global currentVersion
-    url := "https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/version.txt"
-    remoteVersion := Trim(GetRemoteText(url))
-
-    if (remoteVersion != "" && remoteVersion != currentVersion) {
-        MsgBox "Update found! Current: " currentVersion ", Remote: " remoteVersion
-        ; Optionally, call `DownloadAndReplace()` here
-    } else {
-        ToolTip "No updates available"
-        Sleep 1000
-        ToolTip()
-    }
-}
 
 DownloadAndReplace() {
     url := "https://github.com/starry-liam/Grow-A-Macro"
@@ -299,11 +291,53 @@ DownloadAndReplace() {
 }
 GetRemoteText(url) {
     try {
+        http := ComObject("MSXML2.XMLHTTP")
+        http.Open("GET", url, false)
+        http.Send()
+        if (http.Status = 200)
+            return http.ResponseText
+    } catch {
+        return ""
+    }
+    return ""
+}
+DownloadFile(url, savePath) {
+    try {
         http := ComObject("WinHttp.WinHttpRequest.5.1")
         http.Open("GET", url, false)
         http.Send()
-        return http.ResponseText
-    } catch e {
-        return ""
+
+        if (http.Status != 200) {
+            MsgBox "HTTP error: " http.Status
+            return false
+        }
+
+        file := FileOpen(savePath, "w", "UTF-8")
+        if !file {
+            MsgBox "Failed to open file for writing."
+            return false
+        }
+
+        file.Write(http.ResponseText)
+        file.Close()
+        return true
+    }
+    catch as e {
+        MsgBox "Download failed:`n" e.Message
+        return false
     }
 }
+CheckForUpdates() {
+    global currentVersion
+    remoteVersion := GetRemoteText("https://raw.githubusercontent.com/starry-liam/GrowAMacro/main/version.txt")
+
+    if (remoteVersion != "" && remoteVersion != currentVersion) {
+        MsgBox "New version " remoteVersion " available.`nUpdating now..."
+        DownloadAndReplace()
+    } else {
+        ToolTip "No updates found."
+        Sleep 1500
+        ToolTip()
+    }
+}
+
