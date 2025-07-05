@@ -274,6 +274,31 @@ LoadStates() {
     
      
 }
+CheckForUpdates() {
+    global currentVersion
+
+    remoteVersion := GetRemoteText("https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/version.txt")
+    if (remoteVersion == "") {
+        ToolTip("Failed to check for updates.")
+        Sleep 1500
+        ToolTip()
+        return
+    }
+
+    ; Clean and compare
+    current := ParseVersion(currentVersion)
+    remote := ParseVersion(remoteVersion)
+
+    if CompareVersions(remote, current) > 0 {
+        MsgBox "Update available: " remoteVersion "`nUpdating now..."
+        DownloadAndReplace()
+    } else {
+        ToolTip("No updates found.")
+        Sleep 1500
+        ToolTip()
+    }
+}
+
 DownloadAndReplace() {
     url := "https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/main.ahk"
     tempFile := A_Temp "\updated_script.ahk"
@@ -286,7 +311,7 @@ DownloadAndReplace() {
 
     content := FileRead(tempFile)
     if InStr(content, "<!DOCTYPE html>") {
-        MsgBox("Update failed: downloaded content is HTML, not script.")
+        MsgBox("Update failed: downloaded file is HTML.")
         FileDelete(tempFile)
         return
     }
@@ -296,7 +321,29 @@ DownloadAndReplace() {
     ExitApp()
 }
 
+DownloadFile(url, savePath) {
+    try {
+        http := ComObject("WinHttp.WinHttpRequest.5.1")
+        http.Open("GET", url, false)
+        http.Send()
+        if http.Status != 200 {
+            MsgBox "HTTP Error: " http.Status
+            return false
+        }
 
+        content := http.ResponseBody
+        stream := ComObject("ADODB.Stream")
+        stream.Type := 1  ; binary
+        stream.Open()
+        stream.Write(content)
+        stream.SaveToFile(savePath, 2) ; 2 = overwrite
+        stream.Close()
+        return true
+    } catch as e {
+        MsgBox "Download failed: " e.Message
+        return false
+    }
+}
 
 GetRemoteText(url) {
     try {
@@ -308,43 +355,26 @@ GetRemoteText(url) {
         return ""
     }
 }
-DownloadFile(url, savePath) {
-    try {
-        http := ComObject("WinHttp.WinHttpRequest.5.1")
-        http.Open("GET", url, false)
-        http.Send()
 
-        if http.Status != 200
-            throw Error("HTTP Error: " http.Status)
-
-        stream := ComObject("ADODB.Stream")
-        stream.Type := 1  ; binary
-        stream.Open()
-        stream.Write(http.ResponseBody)
-        stream.SaveToFile(savePath, 2)  ; 2 = overwrite
-        stream.Close()
-
-        return FileExist(savePath)
-    } catch as e {
-        MsgBox("Download failed: " e.Message)
-        return false
+ParseVersion(verStr) {
+    parts := StrSplit(verStr, ".")
+    cleaned := []
+    for each, part in parts {
+        num := RegExReplace(part, "[^\d]")  ; Remove all non-digit characters
+        cleaned.Push(num != "" ? Number(num) : 0)
     }
+    return cleaned
 }
-CheckForUpdates() {
-    global currentVersion
-    remoteVersion := GetRemoteText("https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/main/version.txt")
 
-    if (remoteVersion = "") {
-        MsgBox("Could not check for updates.")
-        return
+CompareVersions(remote, localVer) {
+    maxLength := Max(remote.Length, localVer.Length)
+    Loop maxLength {
+        r := (A_Index <= remote.Length) ? remote[A_Index] : 0
+        l := (A_Index <= localVer.Length) ? localVer[A_Index] : 0
+        if (r > l)
+            return 1
+        else if (l > r)
+            return -1
     }
-
-    if (remoteVersion != currentVersion) {
-        MsgBox("New version " remoteVersion " available.`nUpdating now...")
-        DownloadAndReplace()
-    } else {
-        ToolTip "No updates found."
-        Sleep 1500
-        ToolTip()
-    }
+    return 0  ; Versions are equal
 }
