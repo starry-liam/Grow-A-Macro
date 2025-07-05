@@ -276,30 +276,28 @@ LoadStates() {
 }
 
 DownloadAndReplace() {
-    url := "https://github.com/starry-liam/Grow-A-Macro"
+    url := "https://github.com/starry-liam/Grow-A-Macro/blob/main/version.txt"
+    tempFile := A_Temp "\GrowAMacro_Update.ahk"
     newScript := A_ScriptFullPath
-    tempFile := A_Temp "\updated_script.ahk"
 
     if !DownloadFile(url, tempFile) {
-        MsgBox "Failed to download update."
+        MsgBox "Failed to download the update."
         return
     }
 
-    FileCopy tempFile, newScript, true
+    FileCopy tempFile, newScript, true  ; Overwrite current script
     Run newScript
     ExitApp()
 }
 GetRemoteText(url) {
     try {
-        http := ComObject("MSXML2.XMLHTTP")
+        http := ComObject("WinHttp.WinHttpRequest.5.1")
         http.Open("GET", url, false)
         http.Send()
-        if (http.Status = 200)
-            return http.ResponseText
-    } catch {
+        return http.ResponseText
+    } catch as e {
         return ""
     }
-    return ""
 }
 DownloadFile(url, savePath) {
     try {
@@ -329,7 +327,7 @@ DownloadFile(url, savePath) {
 }
 CheckForUpdates() {
     global currentVersion
-    remoteVersion := GetRemoteText("https://raw.githubusercontent.com/starry-liam/GrowAMacro/main/version.txt")
+    remoteVersion := GetRemoteText("https://github.com/starry-liam/Grow-A-Macro/blob/main/version.txt")
 
     if (remoteVersion != "" && remoteVersion != currentVersion) {
         MsgBox "New version " remoteVersion " available.`nUpdating now..."
