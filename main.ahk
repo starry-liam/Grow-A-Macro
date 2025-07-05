@@ -3,6 +3,10 @@
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
 
+currentVersion := "0.2.1"
+
+SetTimer(CheckForUpdates, -5000) ; Run once after 5s
+
 #Include subMacros\seedCollector.ahk
 #Include subMacros\travel.ahk
 ; Global state
@@ -263,4 +267,43 @@ LoadStates() {
     settingsStates[4] := IniRead("config.ini", "Settings", "travelMethod", 2)
     
      
+}
+CheckForUpdates() {
+    global currentVersion
+    url := "https://raw.githubusercontent.com/starry-liam/Grow-A-Macro/version.txt"
+    remoteVersion := Trim(GetRemoteText(url))
+
+    if (remoteVersion != "" && remoteVersion != currentVersion) {
+        MsgBox "Update found! Current: " currentVersion ", Remote: " remoteVersion
+        ; Optionally, call `DownloadAndReplace()` here
+    } else {
+        ToolTip "No updates available"
+        Sleep 1000
+        ToolTip()
+    }
+}
+
+DownloadAndReplace() {
+    url := "https://github.com/starry-liam/Grow-A-Macro"
+    newScript := A_ScriptFullPath
+    tempFile := A_Temp "\updated_script.ahk"
+
+    if !DownloadFile(url, tempFile) {
+        MsgBox "Failed to download update."
+        return
+    }
+
+    FileCopy tempFile, newScript, true
+    Run newScript
+    ExitApp()
+}
+GetRemoteText(url) {
+    try {
+        http := ComObject("WinHttp.WinHttpRequest.5.1")
+        http.Open("GET", url, false)
+        http.Send()
+        return http.ResponseText
+    } catch e {
+        return ""
+    }
 }
