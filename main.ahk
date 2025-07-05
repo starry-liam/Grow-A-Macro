@@ -284,10 +284,19 @@ DownloadAndReplace() {
         return
     }
 
+    content := FileRead(tempFile)
+    if InStr(content, "<!DOCTYPE html>") {
+        MsgBox("Update failed: downloaded content is HTML, not script.")
+        FileDelete(tempFile)
+        return
+    }
+
     FileCopy(tempFile, newScript, true)
     Run(newScript)
     ExitApp()
 }
+
+
 
 GetRemoteText(url) {
     try {
