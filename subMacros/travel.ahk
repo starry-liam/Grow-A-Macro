@@ -63,6 +63,7 @@ seedTravel() {
     Send "s"
 }
 gearTravel() {
+    global settingsStates, slotOptions
     if settingsStates[4] == 3 {
         return
     }
