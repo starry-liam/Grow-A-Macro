@@ -29,7 +29,7 @@ seedCollector(i) {
 
     if (i >= seedLabels.Length+1) {
             
-        exitMenu(exitIndex, seedLabels.Length+1)
+        exitMenu(settingsStates[1], seedLabels.Length+1)
             
         }
     else if seedStates[i] {
@@ -45,7 +45,7 @@ seedCollector(i) {
 gearCollector(g) {
     global gearStates, gearQuantity
     if (g >= gearLabels.Length) {
-        exitMenu(exitIndex, gearLabels.Length)
+        exitMenu(settingsStates[1], gearLabels.Length)
     }
     else if (gearStates[g]) {
         Sleep 100

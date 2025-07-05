@@ -20,7 +20,7 @@ Loop gearLabels.Length
     gearStates[A_Index] := false
 
 settings := ["exitMenu", "align", "recallSLot", "travelMethod"]
-settingsStats := Map()
+settingsStates := Map()
 
 btnWidth := 130
 btnHeight := 26
@@ -36,9 +36,9 @@ centerY := 0
 options := ["Walk", "Recall Wrench", "Disabled"]
 slotOptions := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 exitOptions := ["Mouse", "Keyboard"]
-currentIndex := 2  ; Start with the first option
-slotIndex := 2  ; Start with the first slot
-exitIndex := 1  ; Start with the first exit option
+settingsStates[4] := 2  ; Start with the first option
+settingsStates[3] := 2  ; Start with the first slot
+settingsStates[1] := 1  ; Start with the first exit option
 
 
 mainGui := Gui()
@@ -47,20 +47,21 @@ mainGui.SetFont("s9", "Sergoe UI")
 tab := mainGui.Add("Tab3", "x10 y10 w450 h325", ["Main", "Seeds", "Gear"])
 tab.UseTab(0) ; Important: reset first
 
+LoadStates()
 ; Main tab buttons
 tab.UseTab(1)
 mainGui.Add("Button", "x95 y240 w80 h20", "[F1] Start").OnEvent("Click", (*) => Start())
 mainGui.Add("Button", "x185 y240 w80 h20", "[F2] Toggle").OnEvent("Click", (*) => Toggles())
 mainGui.Add("Button", "x275 y240 w80 h20", "[F3] Stop").OnEvent("Click", (*) => Stop())
 
-leftBtn := mainGui.Add("Button", "x145 y170 w30", "<")
-leftBtn.OnEvent("Click", (*) => ChangeOption(-1))
+leftmethodBtn := mainGui.Add("Button", "x145 y170 w30", "<")
+leftmethodBtn.OnEvent("Click", (*) => ChangeOption(-1))
 
-leftBtn := mainGui.Add("Button", "x145 y140 w30", "<")
-leftBtn.OnEvent("Click", (*) => ChangeSlotOption(-1))
+leftslotBtn := mainGui.Add("Button", "x145 y140 w30", "<")
+leftslotBtn.OnEvent("Click", (*) => ChangeSlotOption(-1))
 
-leftBtn := mainGui.Add("Button", "x145 y110 w30", "<")
-leftBtn.OnEvent("Click", (*) => ChangeExitOption(-1))
+leftexitBtn := mainGui.Add("Button", "x145 y110 w30", "<")
+leftexitBtn.OnEvent("Click", (*) => ChangeExitOption(-1))
 
 mainGui.Add("Text", "x10 y175 w150 Center", "Gear Travel Method:")
 
@@ -68,25 +69,24 @@ mainGui.Add("Text", "x10 y145 w150 Center", "Recall Wrench Slot:")
 
 mainGui.Add("Text", "x10 y115 w150 Center", "Menu Exit Method:")
 
-optionDisplay := mainGui.Add("Text", "x165 y175 w120 Center vOptionLabel", options[currentIndex])
+optionDisplay := mainGui.Add("Text", "x165 y175 w120 Center vOptionLabel", options[settingsStates[4]])
 optionText := mainGui.Add("Text", "x300 y175 w150 Center", "(Recommended)")
 exitText := mainGui.Add("Text", "x300 y115 w150 Center", "(Recommended)")
 
 
-SlotOptionDisplay := mainGui.Add("Text", "x165 y145 w120 Center vSlotOptionLabel", slotOptions[slotIndex])
+SlotOptionDisplay := mainGui.Add("Text", "x165 y145 w120 Center vSlotOptionLabel", slotOptions[settingsStates[3]])
 
-ExitOptionDisplay := mainGui.Add("Text", "x165 y115 w120 Center vExitOptionLabel", exitOptions[exitIndex])
+ExitOptionDisplay := mainGui.Add("Text", "x165 y115 w120 Center vExitOptionLabel", exitOptions[settingsStates[1]])
 
-rightBtn := mainGui.Add("Button", "x275 y170 w30", ">")
-rightBtn.OnEvent("Click", (*) => ChangeOption(1))
+rightmethodBtn := mainGui.Add("Button", "x275 y170 w30", ">")
+rightmethodBtn.OnEvent("Click", (*) => ChangeOption(1))
 
-rightBtn := mainGui.Add("Button", "x275 y140 w30", ">")
-rightBtn.OnEvent("Click", (*) => ChangeSlotOption(1))
+rightslotBtn := mainGui.Add("Button", "x275 y140 w30", ">")
+rightslotBtn.OnEvent("Click", (*) => ChangeSlotOption(1))
 
-rightBtn := mainGui.Add("Button", "x275 y110 w30", ">")
-rightBtn.OnEvent("Click", (*) => ChangeExitOption(1))
+rightexitBtn := mainGui.Add("Button", "x275 y110 w30", ">")
+rightexitBtn.OnEvent("Click", (*) => ChangeExitOption(1))
 
-LoadStates()
 ; Seed tab buttons
 tab.UseTab(2)
 Loop seedLabels.Length {
@@ -151,17 +151,17 @@ InitLoop() {
 }
 
 ChangeOption(direction) {
-    global options, currentIndex, optionDisplay
-    currentIndex += direction
+    global options, settingsStates, optionDisplay
+    settingsStates[4] += direction
 
-    if currentIndex < 1
-        currentIndex := options.Length
-    else if currentIndex > options.Length
-        currentIndex := 1
-    if (currentIndex == 1) {
+    if settingsStates[4] < 1
+        settingsStates[4] := options.Length
+    else if settingsStates[4] > options.Length
+        settingsStates[4] := 1
+    if (settingsStates[4] == 1) {
         optionText.Text := "(Not Promised to work)"
     }
-    else if (currentIndex == 2) {
+    else if (settingsStates[4] == 2) {
         optionText.Text := "(Recommended)"
         if (!gearStates[3])
             GToggle(3)
@@ -169,37 +169,37 @@ ChangeOption(direction) {
     else {
         optionText.Text := "(Disabled)"
     }
-    optionDisplay.Text := options[currentIndex]
+    optionDisplay.Text := options[settingsStates[4]]
 }
 ChangeSlotOption(direction) {
-    global options, slotIndex, SlotOptionDisplay
-    slotIndex += direction
+    global options, settingsStates, SlotOptionDisplay
+    settingsStates[3] += direction
 
-    if slotIndex < 1
-        slotIndex := slotOptions.Length
-    else if slotIndex > slotOptions.Length
-        slotIndex := 1
+    if settingsStates[3] < 1
+        settingsStates[3] := slotOptions.Length
+    else if settingsStates[3] > slotOptions.Length
+        settingsStates[3] := 1
 
-    SlotOptionDisplay.Text := slotOptions[slotIndex]
+    SlotOptionDisplay.Text := slotOptions[settingsStates[3]]
 }
 
 ChangeExitOption(direction) {
-    global options, exitIndex, ExitOptionDisplay
-    exitIndex += direction
+    global options, settingsStates, ExitOptionDisplay
+    settingsStates[1] += direction
 
-    if exitIndex < 1
-        exitIndex := exitOptions.Length
-    else if exitIndex > 1
-        exitIndex := 1
-    if (currentIndex == 1) {
+    if settingsStates[1] < 1
+        settingsStates[1] := exitOptions.Length
+    else if settingsStates[1] > exitOptions.Length
+        settingsStates[1] := 1
+    if (settingsStates[1] == 1) {
         exitText.Text := "(Recommended)"
     }
-    else if (currentIndex == 2) {
+    else if (settingsStates[4] == 2) {
         exitText.Text := "(Works, but not recommended)"
     }
 
 
-    ExitOptionDisplay.Text := exitOptions[exitIndex]
+    ExitOptionDisplay.Text := exitOptions[settingsStates[1]]
 }
 
 F1::Start()
@@ -238,11 +238,15 @@ LoopTask(*) {
     }
 }
 SaveStates() {
-    global seedStates, gearStates, seedLabels, gearLabels
+    global seedStates, gearStates, seedLabels, gearLabels, settingsStates, settings
     Loop seedLabels.Length
         IniWrite seedStates[A_Index], "config.ini", "Seeds", seedLabels[A_Index]
     Loop gearLabels.Length
         IniWrite gearStates[A_Index], "config.ini", "Gear", gearLabels[A_Index]
+    for key, name in settings {
+        if settingsStates.Has(key)
+            IniWrite(settingsStates[key], "config.ini", "Settings", name)
+    }
 }
 LoadStates() {
     global seedStates, gearStates, seedLabels, gearLabels
@@ -254,4 +258,9 @@ LoadStates() {
         val := IniRead("config.ini", "Gear", gearLabels[A_Index], "0") ; default: OFF
         gearStates[A_Index] := val
     }
+    settingsStates[1] := IniRead("config.ini", "Settings", "exitMenu", 1)  
+    settingsStates[3] := IniRead("config.ini", "Settings", "recallSlot", 2)
+    settingsStates[4] := IniRead("config.ini", "Settings", "travelMethod", 2)
+    
+     
 }

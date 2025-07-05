@@ -63,15 +63,15 @@ seedTravel() {
     Send "s"
 }
 gearTravel() {
-    if currentIndex == 3 {
+    if settingsStates[4] == 3 {
         return
     }
-    else if currentIndex == 2 {
+    else if settingsStates[4] == 2 {
         MouseMove(xMPG, yMPG)
         Sleep 100
         MouseMove(xMPG, yMPGO)
         Sleep 500
-        Send (slotOptions[slotIndex])
+        Send (slotOptions[settingsStates[3]])
         Sleep 1000
         Click "Left"
         Sleep 1000
