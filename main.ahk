@@ -1,6 +1,7 @@
 ; AutoHotkey v2.0 version of GrowAMacro GUI
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+SetWorkingDir A_ScriptDir
 
 #Include subMacros\seedCollector.ahk
 #Include subMacros\travel.ahk
@@ -8,7 +9,7 @@
 global toggle := false
 global running := false
 
-seedLabels := ["Carrots", "Strawberries", "Blueberries", "Tomatoes", "Califlower", "Watermelon", "Rafflesia", "Green Apple", "Avocado", "Banana", "Pineapple", "Kiwi", "Bellpepper", "Pricly Pear", "Loquats", "Feijoa", "Pitcher Plant", "Sugar Apple"]
+seedLabels := ["Carrots", "Strawberries", "Blueberries","Orange Tulip", "Tomatoes", "Daffodil", "Watermelon", "Pumpkin", "Apples", "Bamboo", "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape", "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily", "Sugar Apple", "Burning Bud"]
 seedStates := Map()
 Loop seedLabels.Length
     seedStates[A_Index] := true
@@ -17,6 +18,9 @@ gearLabels := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Ad
 gearStates := Map()
 Loop gearLabels.Length
     gearStates[A_Index] := false
+
+settings := ["exitMenu", "align", "recallSLot", "travelMethod"]
+settingsStats := Map()
 
 btnWidth := 130
 btnHeight := 26
@@ -31,13 +35,16 @@ centerY := 0
 
 options := ["Walk", "Recall Wrench", "Disabled"]
 slotOptions := ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+exitOptions := ["Mouse", "Keyboard"]
 currentIndex := 2  ; Start with the first option
 slotIndex := 2  ; Start with the first slot
+exitIndex := 1  ; Start with the first exit option
+
 
 mainGui := Gui()
-mainGui.SetFont("s9", "Segoe UI")
+mainGui.SetFont("s9", "Sergoe UI")
 
-tab := mainGui.Add("Tab3", "x10 y10 w450 h275", ["Main", "Seeds", "Gear"])
+tab := mainGui.Add("Tab3", "x10 y10 w450 h325", ["Main", "Seeds", "Gear"])
 tab.UseTab(0) ; Important: reset first
 
 ; Main tab buttons
@@ -52,14 +59,23 @@ leftBtn.OnEvent("Click", (*) => ChangeOption(-1))
 leftBtn := mainGui.Add("Button", "x145 y140 w30", "<")
 leftBtn.OnEvent("Click", (*) => ChangeSlotOption(-1))
 
+leftBtn := mainGui.Add("Button", "x145 y110 w30", "<")
+leftBtn.OnEvent("Click", (*) => ChangeExitOption(-1))
+
 mainGui.Add("Text", "x10 y175 w150 Center", "Gear Travel Method:")
 
 mainGui.Add("Text", "x10 y145 w150 Center", "Recall Wrench Slot:")
 
+mainGui.Add("Text", "x10 y115 w150 Center", "Menu Exit Method:")
+
 optionDisplay := mainGui.Add("Text", "x165 y175 w120 Center vOptionLabel", options[currentIndex])
 optionText := mainGui.Add("Text", "x300 y175 w150 Center", "(Recommended)")
+exitText := mainGui.Add("Text", "x300 y115 w150 Center", "(Recommended)")
+
 
 SlotOptionDisplay := mainGui.Add("Text", "x165 y145 w120 Center vSlotOptionLabel", slotOptions[slotIndex])
+
+ExitOptionDisplay := mainGui.Add("Text", "x165 y115 w120 Center vExitOptionLabel", exitOptions[exitIndex])
 
 rightBtn := mainGui.Add("Button", "x275 y170 w30", ">")
 rightBtn.OnEvent("Click", (*) => ChangeOption(1))
@@ -67,6 +83,10 @@ rightBtn.OnEvent("Click", (*) => ChangeOption(1))
 rightBtn := mainGui.Add("Button", "x275 y140 w30", ">")
 rightBtn.OnEvent("Click", (*) => ChangeSlotOption(1))
 
+rightBtn := mainGui.Add("Button", "x275 y110 w30", ">")
+rightBtn.OnEvent("Click", (*) => ChangeExitOption(1))
+
+LoadStates()
 ; Seed tab buttons
 tab.UseTab(2)
 Loop seedLabels.Length {
@@ -76,7 +96,8 @@ Loop seedLabels.Length {
     row := Floor((idx - 1) / cols)
     x := 30 + (btnWidth + padding) * col
     y := 55 + (btnHeight + padding) * row
-    btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), "[ON] " label)
+    initialText := (seedStates[idx] ? "[ON] " : "[OFF] ") . label
+    btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), initialText)
     btn.OnEvent("Click", SCallback(idx))
     seedButtons.Push(btn)
     
@@ -93,15 +114,16 @@ Loop gearLabels.Length {
     row := Floor((idx - 1) / cols)
     x := 30 + (btnWidth + padding) * col
     y := 55 + (btnHeight + padding) * row
-    btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), "[OFF] " label)
+    initialText := (gearStates[idx] ? "[ON] " : "[OFF] ") . label
+    btn := mainGui.Add("Button", Format("x{} y{} w{} h{}", x, y, btnWidth, btnHeight), initialText)
     btn.OnEvent("Click", GCallback(idx))
     gearButtons.Push(btn)  ; Store control
 }
 GCallback(i) {
     return (*) => GToggle(i)
 }
-mainGui.OnEvent("Close", (*) => ExitApp())
-mainGui.Show("w475 h300")
+mainGui.OnEvent("Close", (*) => (SaveStates(), ExitApp()))
+mainGui.Show("w475 h350")
 
 ; --- Functions ---
 
@@ -161,10 +183,28 @@ ChangeSlotOption(direction) {
     SlotOptionDisplay.Text := slotOptions[slotIndex]
 }
 
+ChangeExitOption(direction) {
+    global options, exitIndex, ExitOptionDisplay
+    exitIndex += direction
+
+    if exitIndex < 1
+        exitIndex := exitOptions.Length
+    else if exitIndex > 1
+        exitIndex := 1
+    if (currentIndex == 1) {
+        exitText.Text := "(Recommended)"
+    }
+    else if (currentIndex == 2) {
+        exitText.Text := "(Works, but not recommended)"
+    }
+
+
+    ExitOptionDisplay.Text := exitOptions[exitIndex]
+}
+
 F1::Start()
 F2::Toggles()
 F3::ExitApp()
-
 
 Start() {
     global toggle
@@ -195,5 +235,23 @@ LoopTask(*) {
     } else {
         break
     }
+    }
+}
+SaveStates() {
+    global seedStates, gearStates, seedLabels, gearLabels
+    Loop seedLabels.Length
+        IniWrite seedStates[A_Index], "config.ini", "Seeds", seedLabels[A_Index]
+    Loop gearLabels.Length
+        IniWrite gearStates[A_Index], "config.ini", "Gear", gearLabels[A_Index]
+}
+LoadStates() {
+    global seedStates, gearStates, seedLabels, gearLabels
+    Loop seedLabels.Length {
+        val := IniRead("config.ini", "Seeds", seedLabels[A_Index], "1") ; default: ON
+        seedStates[A_Index] := val
+    }
+    Loop gearLabels.Length {
+        val := IniRead("config.ini", "Gear", gearLabels[A_Index], "0") ; default: OFF
+        gearStates[A_Index] := val
     }
 }

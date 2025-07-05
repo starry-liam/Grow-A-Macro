@@ -37,6 +37,13 @@ yMTC := centerY + (yRMTC * centerY)
 xRMTCO := (1010-960)/960
 xMTCO := centerX + (xRMTCO * centerX)
 
+xRMEM := (1300-960)/960
+xMEM := centerX + (xRMEM * centerX)
+yRMEM := (250-540)/540
+yMEM := centerY + (yRMEM * centerY)
+yRMEMO := (245-540)/540
+yMEMO := centerY + (yRMEMO * centerY)
+
 
 seedTravel() {
     gardenTravel()
@@ -189,4 +196,25 @@ align(){
     camAlign()
     Sleep 1000
     zoomAlign()
+}
+exitMenuMouse(){
+    MouseMove(xMEM, yMEM)
+    Sleep 100
+    MouseMove(xMEM, yMEMO)
+    Sleep 500
+    Click "Left"
+    Sleep 1000
+}
+exitMenu(method, amount) {
+    if (method == 1) {
+        Send "\"
+        exitMenuMouse()
+    } else if (method == 2) {
+        loop amount {
+            Send "w"
+            Sleep 100
+        }
+        Send "{Enter}"
+        Send "\"
+    }
 }

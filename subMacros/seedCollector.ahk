@@ -27,21 +27,16 @@ collect(amount) {
 seedCollector(i) {
     global seedStates, seedQuantity
 
-    if (i >= 19) {
+    if (i >= seedLabels.Length+1) {
             
-            loop 19 {
-                send "w"
-                Sleep 100
-            }
-            Send "{Enter}"
-            Send "\"
+        exitMenu(exitIndex, seedLabels.Length+1)
             
         }
     else if seedStates[i] {
         collect(seedQuantity[i])
     }
     else {
-        if (i <= 17) {
+        if (i <= seedLabels.Length-1) {
             Send "s"
         }
     }
@@ -49,20 +44,15 @@ seedCollector(i) {
 
 gearCollector(g) {
     global gearStates, gearQuantity
-    if (g >= 13) {
-        loop 13 {
-            Send "w"
-            Sleep 100
-        }
-        Send "{Enter}"
-        Send "\"
+    if (g >= gearLabels.Length) {
+        exitMenu(exitIndex, gearLabels.Length)
     }
     else if (gearStates[g]) {
-        Sleep 1000
+        Sleep 100
         collect(gearQuantity)
     }
     else if (!gearStates[g]) {
-        if (g <= 12) {
+        if (g <= gearLabels.Length-1) {
             Send "s"
             Sleep 100
         }
@@ -71,10 +61,10 @@ gearCollector(g) {
 
 masterCollect() {
     global i, g
-    seedTravel()
-        loop 19 {
-            if (i > 18) {
-                i := 19
+        seedTravel()
+        loop seedLabels.Length + 1 {
+            if (i > seedLabels.Length) {
+                i := seedLabels.Length + 1
             }
             seedCollector(i)
             i++
@@ -82,9 +72,9 @@ masterCollect() {
         } 
         gearTravel()
         Sleep 1000
-        loop 13 {
-            if (g > 13) {
-                g := 14
+        loop gearLabels.Length {
+            if (g > gearLabels.Length) {
+                g := gearLabels.Length + 1
             }
             else {
                 gearCollector(g)
